@@ -11,7 +11,7 @@
             </div>
             <canvas width="1000" height="200" id="graph" style="border:1px solid #0af;margin-left:10px;"></canvas>
         </div>
-        Speed: <span id="speed" style="display:inline-block;min-width:40px;text-align: right;font-family:monospace;"></span>px/s
+        Speed: <span id="speed" style="display:inline-block;min-width:60px;text-align: right;font-family:monospace;"></span>px/s
         <br>
         Total Distance: <span id="dist" style="font-family:monospace;"></span>px
         <br>
@@ -50,8 +50,8 @@
                     nms+=n[1]
                 }
                 mousespeed = 1000*nms/hold
-                speedelem.innerText = mousespeed
-                totaldistelem.innerText = totaldist
+                speedelem.innerText = mousespeed.toFixed(2)
+                totaldistelem.innerText = totaldist.toFixed(2)
                 scaled.innerText = scale.value
 
                 speedlist.push(mousespeed)
