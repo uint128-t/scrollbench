@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Scroll benchmark</title>
+    </head>
+    <body>
+        <div style="display: flex;flex-flow:row nowrap;">
+            <div style="display:flex;flex-flow: column nowrap;justify-content: space-between;">
+                <span id="scaled">100000</span>
+                <span>0</span>
+            </div>
+            <canvas width="1000" height="200" id="graph" style="border:1px solid #0af;margin-left:10px;"></canvas>
+        </div>
+        Speed: <span id="speed" style="display:inline-block;min-width:40px;text-align: right;font-family:monospace;"></span>px/s
+        <br>
+        Total Distance: <span id="dist"></span>px
+        <br>
+        Hold: <input type="number" value="100" id="hold" style="width:50px;">ms
+        <br>
+        Scale: <input type="number" value="100000" id="scl">px/s
+        <br><p>
+            Hold: Controls how long events are stored for. Higher values increase accuracy of scroll speed but takes longer to react.
+            <br>
+            Scale: Controls the maximum value in the Y-axis of the chart
+        </p>
+        <script>
+            var mousespeed = 0
+            const speedelem = document.getElementById("speed")
+            const holdelem = document.getElementById("hold")
+            const totaldistelem = document.getElementById("dist")
+            const scale = document.getElementById("scl")
+            const scaled = document.getElementById("scaled")
+            var eventlist = []
+            var totaldist = 0
+            var speedlist = []
+            var cve = document.getElementById("graph")
+            var cvs = cve.getContext("2d")
+            onwheel = (e)=>{
+                // mousespeed = Math.abs(e.deltaY/(Date.now()-lastScroll))
+                eventlist.push([Date.now(),Math.abs(e.deltaY)])
+                totaldist+=Math.abs(e.deltaY)
+            }
+            function update(){
+                let hold = holdelem.value
+                while (eventlist.length && eventlist[0][0]<Date.now()-hold){
+                    eventlist.shift()
+                }
+                let nms = 0
+                for (n of eventlist){
+                    nms+=n[1]
+                }
+                mousespeed = 1000*nms/hold
+                speedelem.innerText = mousespeed
+                totaldistelem.innerText = totaldist
+                scaled.innerText = scale.value
+
+                speedlist.push(mousespeed)
+                if (speedlist.length>300){
+                    speedlist.shift()
+                }
+
+                let pvx = 0
+                let pvy = 0
+                cve.width=cve.width
+                cvs.lineWidth = 1
+                cvs.strokeStyle = "#0af"
+                for (let i=0;i<300;i++){
+                    let x = i*(10/3)
+                    let y = speedlist[i]*200/scale.value
+
+                    cvs.rect(x,200-y,1,1)
+                    cvs.moveTo(pvx,200-pvy)
+                    cvs.lineTo(x,200-y)
+                    
+                    pvx = x
+                    pvy = y
+                }
+                cvs.fill()
+                cvs.stroke()
+                
+                requestAnimationFrame(update)
+            }
+            update()
+        </script>
+    </body>
+</html>
